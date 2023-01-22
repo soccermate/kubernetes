@@ -1,5 +1,8 @@
 # kubernetes
 
+### kubernetes_commands.sh
+- eks 클러스터를 생성하기 위한 cli
+
 ### app
 - 6개의 도메인에 대한 컨테이너 생성
 
@@ -11,3 +14,4 @@
 
 ### kafka
 - kafka 서버를 실행하기위해, 컨테이너 생성
+
