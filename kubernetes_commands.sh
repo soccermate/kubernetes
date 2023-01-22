@@ -1,0 +1,1 @@
+eksctl create cluster --name soccermate --nodes-min=3 --version 1.22

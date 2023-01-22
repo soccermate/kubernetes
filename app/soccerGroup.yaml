@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: soccer-group
+  labels:
+    app: soccer-group
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: soccer-group
+  template:
+    metadata:
+      labels:
+        app: soccer-group
+    spec:
+      containers:
+      - name: soccer-group
+        image: harryjung0330/soccer_group:LATEST
+        ports:
+        - name: sg-port
+          containerPort: 8013
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: test
+        - name: jasypt.encryptor.password
+          valueFrom:
+            secretKeyRef:
+              name: secret-config
+              key: jasypt-key
+              optional: false 
+        - name: KAFKA_SERVER_DOMAIN
+          value: kafka-service
+        - name: KAFKA_SERVER_PORT
+          value: "9092"
+        - name: USER_DOMAIN
+          value: user-service
+        - name: USER_PORT
+          value: "8000"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: soccer-group-service
+  name: soccer-group-service
+spec:
+  type: ClusterIP
+  ports:
+    - name: soccer-group-port
+      port: 8000
+      targetPort: sg-port
+  selector:
+    app: soccer-group

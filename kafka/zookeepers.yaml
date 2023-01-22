@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zookeper-1
+  labels:
+    app: zookeeper-1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zookeeper-1
+  template:
+    metadata:
+      labels:
+        app: zookeeper-1
+    spec:
+      containers:
+      - name: zookeeper-1
+        image: zookeeper
+        ports:
+        - name: client-port
+          containerPort: 2181
+        - containerPort: 2888
+          name: server-port
+        - containerPort: 3888
+          name: leader-election
+        volumeMounts:
+          - mountPath: "/data"
+            name: zookeeper-persistent-storage
+          - mountPath: "/datalog"
+            name: zookeeper-persistent-storage
+      volumes:
+        - name: zookeeper-persistent-storage
+          persistentVolumeClaim:
+            claimName: zookeeper-pvc
+      
+      
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: zookeeper-service
+  name: zookeeper-service
+spec:
+  clusterIP: None
+  ports:
+    - name: zookeeper-port
+      port: 2181
+      targetPort: client-port
+    - name: zookeeper-port-server
+      port: 2888
+      targetPort: server-port
+    - name: leader-election-p
+      port: 3888
+      targetPort: leader-election
+  selector:
+    app: zookeeper-1
+

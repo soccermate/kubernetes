@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user
+  labels:
+    app: user
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user
+  template:
+    metadata:
+      labels:
+        app: user
+    spec:
+      containers:
+      - name: user
+        image: harryjung0330/user:0.0.2
+        ports:
+        - name: user-port
+          containerPort: 8012
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: test
+        - name: jasypt.encryptor.password
+          valueFrom:
+            secretKeyRef:
+              name: secret-config
+              key: jasypt-key
+              optional: false 
+        - name: KAFKA_SERVER_DOMAIN
+          value: kafka-service
+        - name: KAFKA_SERVER_PORT
+          value: "9092"
+        - name: AUTHENTICATION_DOMAIN
+          value: authentication-service
+        - name: AUTHENTICATION_PORT
+          value: "8000"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: user-service
+  name: user-service
+spec:
+  type: ClusterIP
+  ports:
+    - name: user-port
+      port: 8000
+      targetPort: user-port
+  selector:
+    app: user

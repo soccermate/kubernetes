@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  labels:
+    app: api-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+      - name: api-gateway
+        image: harryjung0330/grad_api_gateway:0.0.3
+        ports:
+        - name: client-port
+          containerPort: 80
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: test
+        - name: jasypt.encryptor.password
+          valueFrom:
+            secretKeyRef:
+              name: secret-config
+              key: jasypt-key
+              optional: false
+        - name: AUTHENTICATION_DOMAIN
+          value: authentication-service
+        - name: AUTHENTICATION_PORT
+          value: "8000"
+        - name: USER_DOMAIN
+          value: user-service
+        - name: USER_PORT
+          value: "8000"
+        - name: MEETING_DOMAIN
+          value: meeting-service
+        - name: MEETING_PORT
+          value: "8000"
+        - name: VOTE_DOMAIN
+          value: vote-service
+        - name: VOTE_PORT
+          value: "8000"
+        - name: ANNOUNCEMENT_DOMAIN
+          value: announcement-service
+        - name: ANNOUNCEMENT_PORT
+          value: "8000"
+        - name: SOCCER_GROUP_DOMAIN
+          value: soccer-group-service
+        - name: SOCCER_GROUP_PORT
+          value: "8000"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: api-gateway-service
+  name: api-gateway-service
+spec:
+  type: LoadBalancer
+  ports:
+    - name: zookeeper-port
+      port: 80
+      targetPort: 80
+  selector:
+    app: api-gateway

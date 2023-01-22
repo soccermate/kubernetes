@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: announcement
+  labels:
+    app: announcement
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: announcement
+  template:
+    metadata:
+      labels:
+        app: announcement
+    spec:
+      containers:
+      - name: announcement
+        image: harryjung0330/announcement:0.0.2
+        ports:
+        - name: announce-port
+          containerPort: 8014
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: test
+        - name: jasypt.encryptor.password
+          valueFrom:
+            secretKeyRef:
+              name: secret-config
+              key: jasypt-key
+              optional: false 
+        - name: KAFKA_SERVER_DOMAIN
+          value: kafka-service
+        - name: KAFKA_SERVER_PORT
+          value: "9092"
+        - name: SOCCER_GROUP_DOMAIN
+          value: soccer-group-service
+        - name: SOCCER_GROUP_PORT
+          value: "8000"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: annoucement-service
+  name: announcement-service
+spec:
+  type: ClusterIP
+  ports:
+    - name: announcement-port
+      port: 8000
+      targetPort: announce-port
+  selector:
+    app: announcement
